@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tulip – GCC & Egypt C-Level Snapshot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --card-bg: #0b1020;
+      --accent: #2ed3b7;
+      --accent-soft: rgba(46, 211, 183, 0.15);
+      --text-main: #f5f5f5;
+      --text-muted: #9ca3af;
+      --border-soft: #1f2933;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000000 100%);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 32px 16px;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      border-radius: 24px;
+      padding: 24px 24px 32px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9));
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    /* Tabs */
+    .country-tabs {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 4px;
+    }
+
+    .country-tab {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+
+    .country-tab span {
+      opacity: 0.7;
+      font-size: 11px;
+    }
+
+    .country-tab.active {
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .country-panel {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .country-panel.active {
+      display: block;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 12px rgba(46, 211, 183, 0.8);
+    }
+
+    .logo-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .logo-pill {
+      height: 26px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffffff;
+    }
+
+    .hero {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+      margin-top: 6px;
+    }
+
+    .hero-main {
+      flex: 1 1 320px;
+    }
+
+    .hero-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 520px;
+    }
+
+    .hero-highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .hero-metrics {
+      flex: 0 0 280px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .metric-card {
+      background: radial-gradient(circle at top left, #020617, #020617 40%, #020617);
+      border-radius: 18px;
+      border: 1px solid var(--border-soft);
+      padding: 12px 14px 10px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .metric-note {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .vision-strip {
+      margin: 4px 0 20px;
+      padding: 8px 12px;
+      border-radius: 14px;
+      background: rgba(15, 118, 110, 0.16);
+      border: 1px solid rgba(45, 212, 191, 0.35);
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vision-tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      font-weight: 600;
+      padding-right: 10px;
+      border-right: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      border: 1px solid var(--border-soft);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(45, 212, 191, 0.4);
+    }
+
+    .card-body {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    ul {
+      list-style: none;
+      margin-top: 4px;
+    }
+
+    li {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    li::before {
+      content: "•";
+      color: var(--accent);
+      margin-top: 1px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .value-box {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 14px;
+      padding: 8px 10px;
+      border: 1px dashed rgba(148, 163, 184, 0.5);
+      font-size: 12px;
+    }
+
+    .value-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .value-main {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2ed3b7;
+    }
+
+    .value-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .footnote {
+      margin-top: 14px;
+      font-size: 11px;
+      color: #6b7280;
+      text-align: right;
+    }
+
+    .alignment-card {
+      margin-bottom: 24px;
+    }
+
+    .alignment-img {
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      border: 1px solid var(--border-soft);
+      background: #f9fafb;
+    }
+
+    .alignment-caption {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    @media (max-width: 768px) {
+      .page {
+        padding: 20px 18px 24px;
+      }
+      .hero {
+        flex-direction: column;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+      .hero-title {
+        font-size: 26px;
+      }
+      .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .logo-strip {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <!-- COUNTRY TABS -->
+    <nav class="country-tabs">
+      <button class="country-tab active" data-target="qatar">
+        Qatar <span>(QAR)</span>
+      </button>
+      <button class="country-tab" data-target="saudi">
+        Saudi Arabia <span>(SAR)</span>
+      </button>
+      <button class="country-tab" data-target="uae">
+        UAE <span>(AED)</span>
+      </button>
+      <button class="country-tab" data-target="egypt">
+        Egypt <span>(EGP)</span>
+      </button>
+    </nav>
+
+    <!-- ========== QATAR PANEL ========== -->
+    <section class="country-panel active" id="qatar">
+      <!-- TOP BAR: badge + logos -->
+      <div class="top-bar">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Tulip in Qatar &nbsp;|&nbsp; C-Level Snapshot
+        </div>
+
+        <div class="logo-strip">
+          <div class="logo-pill">
+            <img src="tulip-icon.png" alt="Tulip logo" style="height:26px;" />
+          </div>
+          <span>×</span>
+          <div class="logo-pill">
+            <img src="vt.png" alt="Company logo" style="height:26px;" />
+          </div>
+        </div>
+      </div>
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-main">
+          <h1 class="hero-title">
+            Digitising Qatar’s Shop Floor<span class="hero-highlight"> with Tulip</span>
+          </h1>
+          <p class="hero-subtitle">
+            A composable, no-code platform to turn Qatari factories into
+            <span class="hero-highlight">data-driven, high-performance operations</span>,
+            aligned with Qatar’s diversification and advanced manufacturing vision.
+          </p>
+        </div>
+
+        <aside class="hero-metrics">
+          <div class="metric-card">
+            <div class="metric-label">5-Year TAM (Qatar)</div>
+            <div class="metric-value">1.1–1.5B QAR</div>
+            <div class="metric-note">Total Tulip-style opportunity (licenses + services)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">5-Year SOM Target</div>
+            <div class="metric-value">~55M QAR</div>
+            <div class="metric-note">Realistic slice of Qatar market for our practice</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label"># of factories</div>
+            <div class="metric-value">~1,000</div>
+            <div class="metric-note">Prioritising ~500 mid/large industrial sites</div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- Qatar Vision alignment strip -->
+      <section class="vision-strip">
+        <span class="vision-tag">Qatar Vision 2030</span>
+        <span>
+          Tulip-enabled factories support Qatar’s goals for
+          <strong>economic diversification, productivity, and knowledge transfer</strong>,
+          with local engineers building and scaling digital apps on the shop floor.
+        </span>
+      </section>
+
+      <!-- Regional Alignment with INCIT & SIRI -->
+      <section class="card alignment-card">
+        <div class="card-header">
+          <h2 class="card-title">Regional Alignment with INCIT &amp; SIRI</h2>
+          <span class="pill">Industry 4.0 context</span>
+        </div>
+        <div class="card-body">
+          <img
+            src="incit-siri-alignment.png"
+            alt="Regional Alignment with INCIT and SIRI for Industry 4.0 Transformation in Qatar, KSA, UAE and Egypt"
+            class="alignment-img"
+          />
+          <p class="alignment-caption">
+            The World Economic Forum, INCIT and the Smart Industry Readiness Index (SIRI)
+            provide the catalyst, tools and framework for Industry 4.0 transformation,
+            with active government partners in Qatar, Saudi Arabia, UAE and Egypt.
+            Tulip is a perfect fit and can plug directly into this regional ecosystem.
+          </p>
+        </div>
+      </section>
+
+      <!-- MAIN GRID -->
+      <section class="grid">
+        <!-- Left: Why Qatar / Why Now -->
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Why Qatar, Why Now</h2>
+            <span class="pill">Strategic fit</span>
+          </div>
+          <div class="card-body">
+            <p>
+              Qatar is accelerating industrial diversification and advanced manufacturing.
+              Tulip gives Qatari factories a fast, low-risk way to digitise operations line-by-line,
+              with visible impact in months, not years.
+            </p>
+            <ul>
+              <li>Supports national goals for productivity, localisation, and resilience.</li>
+              <li>Perfect for brownfield sites with mixed legacy equipment and systems.</li>
+              <li>AI and AI Agents, operator-centric apps that are easy to adopt on the shop floor.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Right: Executive Benefits -->
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Executive Outcomes</h2>
+            <span class="pill">Client</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>10–20% productivity uplift on targeted lines within 6–12 months (typical global benchmarks).</li>
+              <li>Reduction in rework, scrap, and manual paperwork.</li>
+              <li>Faster time-to-value vs. traditional MES, with lower capex and risk.</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+
+      <!-- VALUE + MARKET SNAPSHOT -->
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">What We Do in Qatar</h2>
+            <span class="pill">Operating model</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>Deploy Tulip apps for work instructions, quality, production visibility and many others.</li>
+              <li>Connect to machines/sensors and 3rd party systems.</li>
+              <li>Build reusable templates for fast roll-out across the wider industrial base.</li>
+              <li>Develop local talent as certified Tulip builders and champions.</li>
+              <li>Licenses renewals and SLAs.</li>
+            </ul>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">Qatar Market Snapshot</h2>
+            <span class="pill">TAM / SAM / SOM</span>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="value-box">
+                <div class="value-label">TAM (5-year)</div>
+                <div class="value-main">1.1–1.5B QAR</div>
+                <div class="value-sub">All realistically Tulip-fit factories in Qatar</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">SAM (5-year)</div>
+                <div class="value-main">0.65–0.9B QAR</div>
+                <div class="value-sub">Mid/large plants &amp; priority sectors</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">SOM (5-year)</div>
+                <div class="value-main">~55M QAR</div>
+                <div class="value-sub">Target share for our implementation practice</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Time to Impact</div>
+                <div class="value-main">8–12 weeks</div>
+                <div class="value-sub">Typical pilot / POC timeline for first line</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- Tulip vs Traditional MES -->
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Why Tulip vs. Traditional MES</h2>
+            <span class="pill">Differentiation</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li><strong>Composable, not monolithic:</strong> Start with one line or process and scale, instead of multi-year “big bang” projects.</li>
+              <li><strong>No-code for engineers:</strong> Process experts build and adjust apps themselves; less dependency on external developers.</li>
+              <li><strong>Faster ROI:</strong> Pilots measured in weeks, not years, ideal for Qatari clients who want clear results before scaling.</li>
+            </ul>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">Qatar Use-Case Highlights</h2>
+            <span class="pill">Use Cases</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size: 12px; color: var(--text-muted);">
+              For instance:
+            </p>
+            <ul>
+              <li>Digital work instructions in all industries.</li>
+              <li>Quality checks and traceability in a food factory.</li>
+              <li>Real-time production visibility in logistics / warehousing.</li>
+              <li>Safety, compliance &amp; audits and remote operations &amp; field service in the energy sector.</li>
+              <li>Asset &amp; maintenance in plants, substations, and fields.</li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+
+      <!-- 5-Year rollout & economics -->
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">5-Year Rollout Plan – Qatar</h2>
+            <span class="pill">Delivery model</span>
+          </div>
+          <div class="card-body">
+            <p>
+              In Qatar, we propose a disciplined rollout targeting
+              <strong>25 factories per year</strong> over the first
+              <strong>5 years</strong>, a total of <strong>125 factories</strong>.
+              Each factory engagement runs on an average timeline of
+              <strong>3.5 months per project</strong>, with multiple factories
+              running in parallel.
+            </p>
+            <ul>
+              <li><strong>Target:</strong> 25 new factories per year × 5 years = 125 factories.</li>
+              <li><strong>Timeline:</strong> ≈3.5 months per factory project (from discovery to go-live).</li>
+              <li><strong>Parallel delivery:</strong> several factories in-flight at any time to optimise resource utilisation.</li>
+            </ul>
+            <p style="margin-top: 6px;">
+              Resource ratios (rule of thumb):
+            </p>
+            <ul>
+              <li>1 Adoption Manager per <strong>8 factories</strong> (all-inclusive: <strong>20k QAR/month</strong>).</li>
+              <li>1 Solution Lead per <strong>6 factories</strong> (all-inclusive: <strong>18k QAR/month</strong>).</li>
+              <li>2 App Builders per <strong>5 factories</strong> (all-inclusive: <strong>15k QAR/month</strong> each).</li>
+            </ul>
+            <p style="margin-top: 6px; font-size: 12px;">
+              At 25 factories per year these ratios imply, at steady state,
+              approximately <strong>3–4 Adoption Managers, 4–5 Solution Leads</strong>,
+              and <strong>~10 App Builders</strong> serving the Qatar portfolio.
+            </p>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">Unit Economics – Qatar (QAR)</h2>
+            <span class="pill">Financials</span>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="value-box">
+                <div class="value-label">Revenue per factory</div>
+                <div class="value-main">~300k QAR</div>
+                <div class="value-sub">Total contract value per project</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Annual factory volume</div>
+                <div class="value-main">~25 factories</div>
+                <div class="value-sub">Target onboarding per year</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">5-year revenue</div>
+                <div class="value-main">~37.5M QAR</div>
+                <div class="value-sub">300k × 125 factories</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Gross profit (30%)</div>
+                <div class="value-main">~11.25M QAR</div>
+                <div class="value-sub">Before overhead &amp; SG&amp;A</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Net profit (20%)</div>
+                <div class="value-main">~7.5M QAR</div>
+                <div class="value-sub">After all-inclusive delivery costs</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Project duration</div>
+                <div class="value-main">≈3.5 months</div>
+                <div class="value-sub">Per factory from start to go-live</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Licenses renewals net profit</div>
+                <div class="value-main">~0.8M QAR/year</div>
+                <div class="value-sub">~25 factories</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </section>
+
+    <!-- ========== SAUDI ARABIA PANEL ========== -->
+    <section class="country-panel" id="saudi">
+      <div class="top-bar">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Tulip in Saudi Arabia &nbsp;|&nbsp; C-Level Snapshot
+        </div>
+
+        <div class="logo-strip">
+          <div class="logo-pill">
+            <img src="tulip-icon.png" alt="Tulip logo" style="height:26px;" />
+          </div>
+          <span>×</span>
+          <div class="logo-pill">
+            <img src="vt.png" alt="Company logo" style="height:26px;" />
+          </div>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div class="hero-main">
+          <h1 class="hero-title">
+            Accelerating Saudi Industry 4.0<span class="hero-highlight"> with Tulip</span>
+          </h1>
+          <p class="hero-subtitle">
+            A flexible, no-code platform to turn Saudi factories into
+            <span class="hero-highlight">smart, highly visible operations</span>,
+            directly aligned with Vision 2030 and industrial diversification.
+          </p>
+        </div>
+
+        <aside class="hero-metrics">
+          <div class="metric-card">
+            <div class="metric-label">5-Year TAM (Saudi Arabia)</div>
+            <div class="metric-value">5.6–7.5B SAR</div>
+            <div class="metric-note">Tulip-style digitisation opportunity (licenses + services)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">5-Year SOM Target</div>
+            <div class="metric-value">~275M SAR</div>
+            <div class="metric-note">Pragmatic share for our Tulip practice</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Industrial base</div>
+            <div class="metric-value">10k+ plants</div>
+            <div class="metric-note">Chemicals, metals, FMCG, building materials, etc.</div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="vision-strip">
+        <span class="vision-tag">Vision 2030</span>
+        <span>
+          Tulip deployments support Saudi Arabia’s push for
+          <strong>non-oil GDP growth, localisation, and smart manufacturing</strong>,
+          giving plant teams the tools to rapidly digitise operations.
+        </span>
+      </section>
+
+      <section class="card alignment-card">
+        <div class="card-header">
+          <h2 class="card-title">Regional Alignment with INCIT &amp; SIRI</h2>
+          <span class="pill">Industry 4.0 context</span>
+        </div>
+        <div class="card-body">
+          <img
+            src="incit-siri-alignment.png"
+            alt="Regional Alignment with INCIT and SIRI for Industry 4.0 Transformation in Qatar, KSA, UAE and Egypt"
+            class="alignment-img"
+          />
+          <p class="alignment-caption">
+            Saudi Arabia is a core partner in the GCC Industry 4.0 and SIRI ecosystem.
+            Tulip provides the execution layer on the shop floor to turn these frameworks
+            into real apps, dashboards and productivity gains.
+          </p>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Why Saudi Arabia, Why Now</h2>
+            <span class="pill">Strategic fit</span>
+          </div>
+          <div class="card-body">
+            <p>
+              The Kingdom’s manufacturing market is large and growing. Many plants run on
+              legacy systems and paper-based processes. Tulip enables a
+              <strong>fast digitisation track</strong> that complements existing MES/ERP,
+              instead of replacing them.
+            </p>
+            <ul>
+              <li>Supports Vision 2030 targets for non-oil industrial growth and localisation.</li>
+              <li>Ideal for petrochemicals, metals, packaging, food, and building materials.</li>
+              <li>Arabic-first, operator-centric apps – easy to adopt across the shop floor.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Executive Outcomes</h2>
+            <span class="pill">Client</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>OEE and throughput improvement on key lines within 6–12 months.</li>
+              <li>Traceability and quality visibility from raw materials to finished goods.</li>
+              <li>Stronger governance and compliance across multi-site operations.</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">What We Do in Saudi Arabia</h2>
+            <span class="pill">Operating model</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>Launch Tulip pilots in high-impact plants (steel, chemicals, FMCG, logistics).</li>
+              <li>Connect machines, historians and ERP to a unified, operator-facing layer.</li>
+              <li>Build a catalogue of reusable apps for fast scale across the Kingdom.</li>
+              <li>Develop local Saudi Tulip builders and champions.</li>
+            </ul>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">Saudi Market Snapshot</h2>
+            <span class="pill">TAM / SAM / SOM</span>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="value-box">
+                <div class="value-label">TAM (5-year)</div>
+                <div class="value-main">5.6–7.5B SAR</div>
+                <div class="value-sub">Tulip-fit manufacturing and logistics base</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">SAM (5-year)</div>
+                <div class="value-main">3.3–4.5B SAR</div>
+                <div class="value-sub">Priority sectors &amp; mid/large plants</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">SOM (5-year)</div>
+                <div class="value-main">~275M SAR</div>
+                <div class="value-sub">Target share for Tulip implementations</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Time to Impact</div>
+                <div class="value-main">8–16 weeks</div>
+                <div class="value-sub">Pilot / lighthouse line</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Why Tulip vs. Traditional MES</h2>
+            <span class="pill">Differentiation</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li><strong>Composable:</strong> start with one line, then expand by app, plant, and region.</li>
+              <li><strong>No-code:</strong> engineers and supervisors can adjust workflows without vendor change requests.</li>
+              <li><strong>Fast payback:</strong> weeks and months, not multi-year monolithic rollouts.</li>
+            </ul>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">Saudi Use-Case Highlights</h2>
+            <span class="pill">Use Cases</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>Smart work instructions and digital checklists in process industries.</li>
+              <li>Real-time production dashboards for plant and cluster managers.</li>
+              <li>Connected maintenance – work orders, inspections and asset history.</li>
+              <li>Logistics and warehouse operations (inbound, outbound, yard).</li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">5-Year Rollout Plan – Saudi Arabia</h2>
+            <span class="pill">Delivery model</span>
+          </div>
+          <div class="card-body">
+            <p>
+              Similar to Qatar, we assume a disciplined roll-out of
+              <strong>~25 plants per year</strong> in core sectors,
+              focusing on high-visibility sites that can be used as
+              internal benchmarks for the wider portfolio.
+            </p>
+            <ul>
+              <li>Every project ≈3.5–4 months from discovery to go-live.</li>
+              <li>Multi-site programmes with standardised app templates.</li>
+              <li>Local Saudi team plus near-shore support where needed.</li>
+            </ul>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">Unit Economics – Saudi Arabia (SAR)</h2>
+            <span class="pill">Financials</span>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="value-box">
+                <div class="value-label">Revenue per factory</div>
+                <div class="value-main">~310k SAR</div>
+                <div class="value-sub">Typical Tulip project size</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">5-year volume</div>
+                <div class="value-main">~125 factories</div>
+                <div class="value-sub">At 25 per year</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">5-year revenue</div>
+                <div class="value-main">~38.8M SAR</div>
+                <div class="value-sub">310k × 125 factories</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Gross profit (30%)</div>
+                <div class="value-main">~11.6M SAR</div>
+                <div class="value-sub">Before overhead &amp; SG&amp;A</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Net profit (20%)</div>
+                <div class="value-main">~7.8M SAR</div>
+                <div class="value-sub">After all-inclusive costs</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </section>
+
+    <!-- ========== UAE PANEL ========== -->
+    <section class="country-panel" id="uae">
+      <div class="top-bar">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Tulip in UAE &nbsp;|&nbsp; C-Level Snapshot
+        </div>
+
+        <div class="logo-strip">
+          <div class="logo-pill">
+            <img src="tulip-icon.png" alt="Tulip logo" style="height:26px;" />
+          </div>
+          <span>×</span>
+          <div class="logo-pill">
+            <img src="vt.png" alt="Company logo" style="height:26px;" />
+          </div>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div class="hero-main">
+          <h1 class="hero-title">
+            Powering UAE Future Industries<span class="hero-highlight"> with Tulip</span>
+          </h1>
+          <p class="hero-subtitle">
+            A modern, composable platform for <span class="hero-highlight">Operation 300bn</span> factories
+            and advanced manufacturing hubs in the UAE.
+          </p>
+        </div>
+
+        <aside class="hero-metrics">
+          <div class="metric-card">
+            <div class="metric-label">5-Year TAM (UAE)</div>
+            <div class="metric-value">3.5–4.5B AED</div>
+            <div class="metric-note">Tulip-fit manufacturing &amp; logistics opportunity</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">5-Year SOM Target</div>
+            <div class="metric-value">~200M AED</div>
+            <div class="metric-note">Focused share through lighthouse factories</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Sector focus</div>
+            <div class="metric-value">High-value industries</div>
+            <div class="metric-note">Pharma, metals, F&amp;B, aerospace, logistics</div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="vision-strip">
+        <span class="vision-tag">Operation 300bn</span>
+        <span>
+          Tulip supports UAE’s ambition to
+          <strong>double manufacturing output, grow exports and create skilled jobs</strong>
+          by digitising factories from the shop floor up.
+        </span>
+      </section>
+
+      <section class="card alignment-card">
+        <div class="card-header">
+          <h2 class="card-title">Regional Alignment with INCIT &amp; SIRI</h2>
+          <span class="pill">Industry 4.0 context</span>
+        </div>
+        <div class="card-body">
+          <img
+            src="incit-siri-alignment.png"
+            alt="Regional Alignment with INCIT and SIRI for Industry 4.0 Transformation in Qatar, KSA, UAE and Egypt"
+            class="alignment-img"
+          />
+          <p class="alignment-caption">
+            UAE is positioning itself as a global hub for future industries.
+            Tulip brings a practical way to execute this strategy in factories and logistics sites.
+          </p>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Why UAE, Why Now</h2>
+            <span class="pill">Strategic fit</span>
+          </div>
+          <div class="card-body">
+            <p>
+              UAE plants often run modern equipment but still lack unified, real-time visibility
+              across lines and sites. Tulip provides the missing <strong>agile operations layer</strong>.
+            </p>
+            <ul>
+              <li>Perfect for high-value, high-regulation sectors such as pharma and aerospace.</li>
+              <li>Strong fit with free zones and industrial cities focused on export.</li>
+              <li>Ideal sandbox for innovation and scaling across the wider region.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Executive Outcomes</h2>
+            <span class="pill">Client</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>Real-time visibility of output, quality and downtimes.</li>
+              <li>Consistent, validated digital procedures across multi-site networks.</li>
+              <li>Stronger compliance and audit trails for regulated industries.</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">What We Do in UAE</h2>
+            <span class="pill">Operating model</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>Tulip pilots in flagship factories (free zones, industrial cities).</li>
+              <li>Integrated apps connecting equipment, sensors and cloud systems.</li>
+              <li>Library of templates sharable across UAE and GCC operations.</li>
+            </ul>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">UAE Market Snapshot</h2>
+            <span class="pill">TAM / SAM / SOM</span>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="value-box">
+                <div class="value-label">TAM (5-year)</div>
+                <div class="value-main">3.5–4.5B AED</div>
+                <div class="value-sub">Tulip-fit industrial base</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">SAM (5-year)</div>
+                <div class="value-main">2.1–2.7B AED</div>
+                <div class="value-sub">High-priority verticals</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">SOM (5-year)</div>
+                <div class="value-main">~200M AED</div>
+                <div class="value-sub">Target share through focused execution</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Time to Impact</div>
+                <div class="value-main">8–12 weeks</div>
+                <div class="value-sub">Pilot / lighthouse site</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">5-Year Rollout – UAE</h2>
+            <span class="pill">Delivery model</span>
+          </div>
+          <div class="card-body">
+            <p>
+              Similar 25-sites-per-year model, starting with iconic factories
+              and logistics hubs that can act as <strong>regional showcases</strong>.
+            </p>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">Unit Economics – UAE (AED)</h2>
+            <span class="pill">Financials</span>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="value-box">
+                <div class="value-label">Revenue per factory</div>
+                <div class="value-main">~300k AED</div>
+                <div class="value-sub">Per Tulip project</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">5-year volume</div>
+                <div class="value-main">~125 factories</div>
+                <div class="value-sub">At 25 per year</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">5-year revenue</div>
+                <div class="value-main">~37.5M AED</div>
+                <div class="value-sub">300k × 125 factories</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Gross profit (30%)</div>
+                <div class="value-main">~11.25M AED</div>
+                <div class="value-sub">Before overhead &amp; SG&amp;A</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Net profit (20%)</div>
+                <div class="value-main">~7.5M AED</div>
+                <div class="value-sub">After all-inclusive costs</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </section>
+
+    <!-- ========== EGYPT PANEL ========== -->
+    <section class="country-panel" id="egypt">
+      <div class="top-bar">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Tulip in Egypt &nbsp;|&nbsp; C-Level Snapshot
+        </div>
+
+        <div class="logo-strip">
+          <div class="logo-pill">
+            <img src="tulip-icon.png" alt="Tulip logo" style="height:26px;" />
+          </div>
+          <span>×</span>
+          <div class="logo-pill">
+            <img src="vt.png" alt="Company logo" style="height:26px;" />
+          </div>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div class="hero-main">
+          <h1 class="hero-title">
+            Digitising Egypt’s Manufacturing Base<span class="hero-highlight"> with Tulip</span>
+          </h1>
+          <p class="hero-subtitle">
+            A practical platform to bring <span class="hero-highlight">real-time visibility and standard work</span>
+            into Egypt’s large and diverse industrial sector.
+          </p>
+        </div>
+
+        <aside class="hero-metrics">
+          <div class="metric-card">
+            <div class="metric-label">5-Year TAM (Egypt)</div>
+            <div class="metric-value">≈55–65B EGP</div>
+            <div class="metric-note">Tulip-style digital operations opportunity</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">5-Year SOM Target</div>
+            <div class="metric-value">≈2–3B EGP</div>
+            <div class="metric-note">Focused, high-value subset of the market</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Industrial base</div>
+            <div class="metric-value">Tens of thousands</div>
+            <div class="metric-note">From heavy industry to SMEs</div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="vision-strip">
+        <span class="vision-tag">Egypt Vision 2030</span>
+        <span>
+          Tulip supports Egypt’s objective to
+          <strong>raise industrial productivity, exports, and job quality</strong>
+          through scalable, low-code digital tools.
+        </span>
+      </section>
+
+      <section class="card alignment-card">
+        <div class="card-header">
+          <h2 class="card-title">Regional Alignment with INCIT &amp; SIRI</h2>
+          <span class="pill">Industry 4.0 context</span>
+        </div>
+        <div class="card-body">
+          <img
+            src="incit-siri-alignment.png"
+            alt="Regional Alignment with INCIT and SIRI for Industry 4.0 Transformation in Qatar, KSA, UAE and Egypt"
+            class="alignment-img"
+          />
+          <p class="alignment-caption">
+            Egypt is a key industrial hub in the region. Tulip connects local plants
+            to global Industry 4.0 best practices in a pragmatic, step-by-step way.
+          </p>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Why Egypt, Why Now</h2>
+            <span class="pill">Strategic fit</span>
+          </div>
+          <div class="card-body">
+            <p>
+              Egypt has one of Africa’s largest manufacturing outputs but still relies heavily
+              on manual processes. Tulip is a way to <strong>upgrade without ripping and replacing</strong>.
+            </p>
+            <ul>
+              <li>Strong opportunity in food, textiles, building materials, and automotive suppliers.</li>
+              <li>High impact from simple digital apps on quality, scrap and rework.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">Executive Outcomes</h2>
+            <span class="pill">Client</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>Better control over quality and waste in cost-sensitive markets.</li>
+              <li>Standardised work across factories and governorates.</li>
+              <li>Real-time production visibility for management and owners.</li>
+            </ul>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">What We Do in Egypt</h2>
+            <span class="pill">Operating model</span>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>Pilots in anchor factories that can influence their supply chains.</li>
+              <li>Digital work instructions, quality checks and performance boards.</li>
+              <li>Gradual scaling to clusters of factories (industrial zones).</li>
+            </ul>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">Egypt Market Snapshot</h2>
+            <span class="pill">TAM / SAM / SOM</span>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="value-box">
+                <div class="value-label">TAM (5-year)</div>
+                <div class="value-main">≈55–65B EGP</div>
+                <div class="value-sub">Tulip-fit factories and logistics</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">SAM (5-year)</div>
+                <div class="value-main">≈35–40B EGP</div>
+                <div class="value-sub">Priority segments and plants</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">SOM (5-year)</div>
+                <div class="value-main">≈2–3B EGP</div>
+                <div class="value-sub">Target share for our practice</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Time to Impact</div>
+                <div class="value-main">8–16 weeks</div>
+                <div class="value-sub">Pilot / lighthouse plant</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card-header">
+            <h2 class="card-title">5-Year Rollout – Egypt</h2>
+            <span class="pill">Delivery model</span>
+          </div>
+          <div class="card-body">
+            <p>
+              A realistic approach is to build a network of
+              <strong>lighthouse factories</strong> in strategic sectors,
+              then scale to their suppliers and satellite plants.
+            </p>
+          </div>
+        </article>
+
+        <aside class="card">
+          <div class="card-header">
+            <h2 class="card-title">Unit Economics – Egypt (EGP)</h2>
+            <span class="pill">Financials</span>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="value-box">
+                <div class="value-label">Revenue per factory</div>
+                <div class="value-main">~4M EGP</div>
+                <div class="value-sub">Tulip project &amp; services</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">5-year volume</div>
+                <div class="value-main">~125 factories</div>
+                <div class="value-sub">Illustrative scenario</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">5-year revenue</div>
+                <div class="value-main">~500M EGP</div>
+                <div class="value-sub">4M × 125 factories</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Gross profit (30%)</div>
+                <div class="value-main">~150M EGP</div>
+                <div class="value-sub">Before overhead &amp; SG&amp;A</div>
+              </div>
+              <div class="value-box">
+                <div class="value-label">Net profit (20%)</div>
+                <div class="value-main">~100M EGP</div>
+                <div class="value-sub">After all-inclusive costs</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </section>
+
+    <!-- FOOTNOTE -->
+    <div class="footnote">
+      *TAM / SAM / SOM and unit economics are internal, directional estimates across Qatar, Saudi Arabia, UAE and Egypt, based on manufacturing data and global MES / Industry 4.0 benchmarks; values shown for strategic sizing, not formal market guidance.
+    </div>
+  </main>
+
+  <script>
+    const tabs = document.querySelectorAll('.country-tab');
+    const panels = document.querySelectorAll('.country-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-target');
+
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+
+        tab.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
